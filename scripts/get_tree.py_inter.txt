@@ -1,1 +1,0 @@
-python scripts/get_tree.py data/3.slim_01122022/2.inferred/3.needle/1.trees/scripts/get_tree.py 500000  > data/3.slim_01122022/2.inferred/3.needle/3.Newick/scripts/get_tree.py_NEEDLE.newick

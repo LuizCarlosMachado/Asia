@@ -136,8 +136,7 @@ def ts_node_dict_anc(position,ts):
     for l in leaves:
         if l not in sel_leaves:
             anc_leaves.append(l)
-    #print("len anc_leaves, anc_leaves:", len(anc_leaves),anc_leaves)
-    #print("len sel_leaves, sel_leaves:", len(sel_leaves),sel_leaves)
+
    
     coal_ages = {}
     for n in nodes:
@@ -145,9 +144,7 @@ def ts_node_dict_anc(position,ts):
         coal_ages[n] = age
     # sort by age
     coal_ages = dict(sorted(coal_ages.items(), key=lambda item: item[1],reverse=True))
-    #print("Coal_ages len:",len(coal_ages),coal_ages)
     coal_intervals = times2intervals(coal_ages)
-    #print("Coal intervals len: ", len(coal_intervals),coal_intervals)
     # sample IDs must be same as node IDs, which is default
     sample_ids = list(tree.samples())
     #print(sample_ids)
@@ -183,58 +180,26 @@ def ts_node_dict_anc(position,ts):
     anc_int = []
     # loop over coal_intervals sorted by age
     for n in coal_intervals:
-        #print("interval and age: ", n, tree.time(n))
         children = children_of_node(n,tree)
         tips = tips_of_node(n,tree)
-        #print("n, children, tips", n,children,tips)
         if len(children) != 0:
             #age = tree.time(n)
             coal_int[n] = coal_intervals[n]
         # non-tip node with all mutated children
         if len(children) != 0 and set(tips).issubset(sel_ids):
             sel_int.append(n)
-            #print("Selected node:",n)
-            #if n in roots:
-                #k += 1
-            #    pass
-            #else:
-            #    parent = tree.parent(n)
-            #    ptips = tips_of_node(parent,tree)
-                #if not set(ptips).issubset(sel_ids):
-                    #k += 1
-                #    pass
+
         # ancestral node
         elif len(children) != 0 and not set(tips).issubset(sel_ids):
-            #if n not in roots:
-            #    print("Neutral node:",n, tree.time(n),tree.time(tree.parent(n)))
-            #anc_int.append(n)
-            # age of the node under which the mutation occured
             pre_mutation_node_age = tree.time(tree.parent(parent_node))
-            # Coalescence is younger than derived allele
-            #if tree.time(n) < node_age and tree.time(tree.parent(n)) < node_age:
-            #    anc_int.append(n)
-            #
             if tree.time(n) < pre_mutation_node_age:
                 if len(children) != 0:   
                     anc_int.append(n)
                 if tree.time(n) < node_age and tree.time(tree.parent(n)) > node_age:
                     k += 1
-                    #print("Increment k2 for n, age_n, age_parent_n:", n, tree.time(n),tree.time(tree.parent(n)))
-                #anc_int.append(n)
-                #if tree.parent(n) in roots:
-                #    k += 1
-                # count two lineages for each ancestral coalescence contemporaneous with the derived mutation
-                #else:
-                #    k += 2
-                #if tree.parent(n) not in anc_int:
-                #    anc_int.append(tree.parent(n))
-                #print("Neutral root node:",n)
         elif len(children) == 0 and not set([n]).issubset(sel_ids):
             if tree.time(n) < node_age and tree.time(tree.parent(n)) > node_age:
                 k += 1
-                #print("Increment k2 for n, age_n, age_parent_n:", n, tree.time(n),tree.time(tree.parent(n)))
-            #print("Neutral node:",n, tree.time(n),tree.time(tree.parent(n)))
-            #node_age
 
     anc_ages = {}
     sel_ages = {}
@@ -245,12 +210,6 @@ def ts_node_dict_anc(position,ts):
             sel_ages[key] = value
     anc_intervals = times2intervals(anc_ages)
     sel_intervals = times2intervals(sel_ages)
-    #print("Converted anc ages to intervals:", anc_ages,anc_intervals)
-    #print("anc_intervals:", len(anc_intervals), anc_intervals)    
-    #print("coal_intervals:", len(coal_intervals),coal_intervals)
-    #print("anc_int",len(anc_int), anc_int)
-    #print("sel_int",len(sel_int), sel_int)
-    #print("all_int including pre mutation", len(list(coal_intervals.keys())),list(coal_intervals.keys()))
     return [coal_int, sel_ids, k, anc_int, coal_ages,icounter,anc_leaves,sel_leaves,anc_intervals,sel_intervals,sel_int,parent_node]
  
 def ts_node_dict_neut(position,ts):
@@ -279,21 +238,13 @@ def ts_node_dict_neut(position,ts):
     for n in nodes:
         age = tree.time(n)
         coal_ages[n] = age
-    # sort by age
     coal_ages = dict(sorted(coal_ages.items(), key=lambda item: item[1],reverse=True))
-    #print("Coal_ages len:",len(coal_ages),coal_ages)
     coal_intervals = times2intervals(coal_ages)
-    #print("Coal intervals len: ", len(coal_intervals),coal_intervals)
-    # sample IDs must be same as node IDs, which is default
     sample_ids = list(tree.samples())
-    #print(sample_ids)
-    #print(sample_genotypes)
-    #sel_ids = []
+
     sel_dict = {}
     ind_dict = {}
- 
-    #Check if tip node based on len of children list of node 1
-    # len(tree.children(1))
+
     roots = tree.roots
     k = 0
     # all coalescent intervals and ages
@@ -333,10 +284,7 @@ def ts_node_dict_neut(position,ts):
             sel_ages[key] = value
     anc_intervals = times2intervals(anc_ages)
     sel_intervals = times2intervals(sel_ages)
-    #print("Converted anc ages to intervals:", anc_ages,anc_intervals)
-    #print("Converted sel ages to intervals:", sel_ages,sel_intervals)
-    #print("anc_intervals:", len(anc_intervals), anc_intervals)    
-    #print("coal_intervals:", len(coal_intervals),coal_intervals)
+
     return [coal_int, coal_ages, anc_ages, sel_ages, anc_intervals, sel_intervals, sel_int, anc_int, anc_leaves, sel_leaves]
  
 def ts_node_dict(position,ts):
@@ -348,9 +296,7 @@ def ts_node_dict(position,ts):
     # get the tree at the selected position
     tree = ts.at(position)
     sel_ids = tips_of_node(parent_node,tree)
-    #print("sel_ids:",len(sel_ids),sel_ids)
     node_age = tree.time(parent_node)
-    #print("Pos: ", position, " Age: ", tree.time(parent_node))
     nodes = list(tree.nodes())
     coal_ages = {}
     for n in nodes:
@@ -362,31 +308,9 @@ def ts_node_dict(position,ts):
     cur_age = 0
     cur_node = 0
     coal_intervals = times2intervals(coal_ages)
-    #print("coal_ages:",coal_ages)
-#    for i,(k,v) in enumerate(coal_ages.items(),1):
-#        if cur_age > 0 and i != dictlen:
-#            #print("not First or last")
-#            coal_intervals[cur_node] = cur_age - v
-#            cur_age = v
-#            cur_node = k
-#        elif i == dictlen and i == 1:
-#            #print("Last item")
-#            #coal_intervals[cur_node] = cur_age - v
-#            coal_intervals[k] = v
-#        elif i == dictlen:
-#            #print("Last item")
-#            coal_intervals[cur_node] = cur_age - v
-#            coal_intervals[k] = v
-#        else:
-#            #print("first")
-#            cur_age = v
-#            cur_node = k
-    #print("coal_intervals:",coal_intervals)
     # sample IDs must be same as node IDs, which is default
     sample_ids = list(tree.samples())
-    #print(sample_ids)
-    #print(sample_genotypes)
-    #sel_ids = []
+
     sel_dict = {}
     ind_dict = {}
 
@@ -403,61 +327,20 @@ def ts_node_dict(position,ts):
         else:
             ind_dict[ind] = {s:genotype}
 
-    #for idx,g in enumerate(sample_genotypes):
-    #    if g == 1:
-    #        genotype = 1
-    #        sel_ids.append(sample_ids[idx])
-    #    else:
-    #        genotype = 0
-    #    sel_dict[sample_ids[idx]] = genotype
-    #    ind = ts.node(sample_ids[idx]).individual
-    #    if ind in ind_dict:
-    #        ind_dict[ind][sample_ids[idx]] = genotype
-    #    else:
-    #        ind_dict[ind] = {sample_ids[idx]:genotype}
-    
-    #print(selnode)
-    #sn_children = children_of_node(selnode,tree)
-    #counter = 0
-    #for c in sn_children:
-    #    if c in sel_ids:
-    #        counter += 1
     icounter = 0
     for i in ind_dict:
         if 1 in ind_dict[i].values():
             icounter += 1
-    # A test suggests that the mutation node is not the parent of all of the variants, possibly due to recombination
-    #print(counter, " of ",len(sel_ids)," selected genomes were found in the selected parent node")
-    #print(icounter, " of ",len(ind_dict)," selected individuals were found")
-    # Note that the TreeSeq includes each subgenome of a diploid as a separate sample
-    # The number of samples with a mutation thus reflects the number of subgenoms that have it
-    
-    
-    # When trees do not converge, or when mutated samples are scattered across the tree
-    # we need to extract a list of subtrees based on the list of mutated genomes
-    #for r in tree.roots:
-    #    print(len(children_of_node(r,tree)))
-    
-    # Iterate over every non-tip node in one tree sequence
-    # for each node, if all its children are mutant
-    # add the node and its age to a dict
-    # We also need to calculate k, the total number of independent lineages for the mutation
-    # if all children of node are mutant but this is not true for parent node OR there is no parent node
-    # then increment k by 1
-    
-    #Check if tip node based on len of children list of node 1
-    # len(tree.children(1))
+
     roots = tree.roots
     k = 0
-    # all coalescent intervals and ages
     coal_int = {}
-    # selected coalescent intervals with all selected child nodes
     sel_int = []
     for n in coal_intervals:
         children = children_of_node(n,tree)
         tips = tips_of_node(n,tree)
         if len(children) != 0:
-            #age = tree.time(n)
+        #age = tree.time(n)
             coal_int[n] = coal_intervals[n]
         # non-tip node with all mutated children
         if len(children) != 0 and set(tips).issubset(sel_ids):
@@ -469,13 +352,7 @@ def ts_node_dict(position,ts):
                 ptips = tips_of_node(parent,tree)
                 if not set(ptips).issubset(sel_ids):
                     k += 1
-    #coal_int = dict(sorted(coal_int.items(), key=lambda item: item[1],reverse=True))
-    #print("Coal_int:",coal_int)
-    #print("Nodes: ", len(nodes))
-    #print("Sel IDs" , len(sel_ids))
-    #print(len(coal_int))
-    #print(len(sel_int))
-    #print(k)
+
     sel_ages = {}
     for key,value in coal_ages.items():
         if key in sel_int:
@@ -487,21 +364,15 @@ def ts_node_dict(position,ts):
    
    
 def twosite_tstat(ts,sel_pos,ts2,neut_pos):
-    #print("Analysing two sites!")
     neut_res = ts_node_dict_neut(neut_pos,ts2)
     anc_res = ts_node_dict_anc(sel_pos,ts)
-    #print("coal_int, sel_ids, k, anc_int, node_age,icounter,anc_leaves,sel_leaves")
-    #print("Derived tree:", anc_res)
-    #[coal_int, coal_ages, anc_ages, sel_ages, anc_intervals, sel_intervals, sel_int, anc_int, anc_leaves, sel_leaves]
-    #print("Neutral tree:", neut_res)
+
     t1_children = anc_res[10]
     tree1 = ts.at(sel_pos)
     # age of parent node for mutation
     t1_node_age = tree1.time(anc_res[11])
 
-    #t2_children = neut_res[10]
     tree2 = ts2.at(neut_pos)
-    #t2_node_age = neut_res[4]
 
     # numbers correspond to chromosomes NOT diploid individuals
     # derived extant tips    
@@ -556,9 +427,6 @@ def twosite_tstat(ts,sel_pos,ts2,neut_pos):
             C_der += math.comb(i,2) * value
             Csub_der += math.comb(t1_count,2) * der_intervals[key]
             t1_count += 1
-    #print("Selected mutation age:", t1_node_age)
-    #print("Neutral coal ages: ", neut_res[1])
-    #print("Neutral interval number and content: ",len(neut_intervals),neut_intervals)
     for i, (key,value) in enumerate(neut_res[0].items(),1):
         #print("i,key,value,sub_i:",i,key,value,t2_count)
         C2_full += math.comb(i,2) * value
@@ -642,13 +510,6 @@ def twosite_tstat(ts,sel_pos,ts2,neut_pos):
     print(*list(outdict.keys()),sep="\t")
     print(*list(outdict.values()),sep="\t")
 
-    #print("Coalescence intervals for derived subtree:",der_intervals)
-    #print("Terminal DAF: ", n/(n+m))
-    #print("Coalescence intervals for derived subtree list:",der_intervals.values())
-    #print("Coalescence intervals for ancestral subtree:",anc_intervals)
-    #print("Coalescence intervals for derived subtree:",der_intervals)
-    #print("Coalescence ages for tree:",sorted(list(set((int(k) for k in t1_node_age.values())))))
- 
 
 def onesite_tstat(ts,sel_pos):
     
@@ -775,56 +636,23 @@ def onesite_tstat(ts,sel_pos):
     N_all = C_all / (2*((n+m)-1))
     N_der = C1 / (2*(n-k1))
     N_anc = C2 / (2*(m-k2))
-
-    #N_der = C1 / (2*(n-k1)) *(1-(n/(n+m)))
-    #N_anc = C2 / (2*(m-k2)) *(n/(n+m))
-
     N_der_sub = Csub_der / (2*(n-k1))
     N_anc_sub = Csub_anc / (2*(m-k2))
-    
-    #N_der_sub = Csub_der / (2*(n-k1)) *(1-(n/(n+m)))
-    #N_anc_sub = Csub_anc / (2*(m-k2)) *(n/(n+m))
-
     t1_max_likelihood = -(n - k1)*(math.log(C1/(n - k1))) - (n - k1)
     t2_max_likelihood = -(m - k2)*(math.log(C2/(m - k2))) - (m - k2)
     a = -(n + m - k1 - k2)
     b = math.log((C1 + C2)/(n + m - k1 - k2))
     c = (n + m - k1 - k2)
     t1_t2_max_likelihood = (a * b) - c
-
     t1_sub_max_likelihood = -(n - k1)*(math.log(Csub_der/(n - k1))) - (n - k1)
     t2_sub_max_likelihood = -(m - k2)*(math.log(Csub_anc/(m - k2))) - (m - k2)
     a = -(n + m - k1 - k2)
     b_sub = math.log((Csub_der + Csub_anc)/(n + m - k1 - k2))
     c = (n + m - k1 - k2)
     t1_t2_sub_max_likelihood = (a * b_sub) - c
- 
     pi = (n - k1) / (n + m - k1 -k2)
     phi = C1 / (C1 + C2)
-    #phi = C1*(1-(n/n+m)) / (C1*(1-(n/n+m)) + C2*((n/n+m)))
-    
-    
-    
-    
-    
-    
-    
-    #print("pi :",pi)
-    #print("phi :", phi)
-    # This simplification has an error so leaving the full terms for now
-    #T_statistic_final = (n - k1) * math.log(pi/phi) + ((m - k2) * math.log((phi-pi)/(1-phi)))
-    #Ta = (n - k1) * math.log(((C1*n)-(C1*k1)+(C2*n)-(C2*k1))/((C1*n)+(C1*m)-(C1*k1)-(C1*k2)))
-    #Tb = (m - k2) * math.log(((C1*m)-(C1*k2)+(C2*m)-(C2*k2))/((C2*n)+(C2*m)-(C2*k1)-(C2*k2)))
-    #T_statistic_final = Ta + Tb
-    #print("T_statistic_final: ", T_statistic_final)
-    
-    #term1 = (n - k1) * math.log(((C1 + C2)*(n-k1))/(C1*(n + m - k1 - k2))) 
-    #term2 = (m - k2) * math.log(((C1 + C2)*(m - k2))/(C2*(n + m - k1 - k2)))
-    #T_statistic = term1 + term2
-    #sub_term1 = (n - k1) * math.log(((sub_C1 + sub_C2)*(n-k1))/(sub_C1*(n + m - k1 - k2)))
-    #sub_term2 = (m - k2) * math.log(((sub_C1 + sub_C2)*(m - k2))/(sub_C2*(n + m - k1 - k2)))
-    #sub_T_statistic = sub_term1 + sub_term2
-    #print("T_statistic: ", T_statistic, "sub_T_statistic: ", sub_T_statistic)
+
     
     T_statistic_basic = (t1_max_likelihood + t2_max_likelihood) - t1_t2_max_likelihood
     T_statistic_improved = T_statistic_basic -math.log(n) - math.log(comb(m,k2)) + math.log(comb(n+m, k1+k2))    
@@ -832,19 +660,6 @@ def onesite_tstat(ts,sel_pos):
     sub_T_statistic_improved = sub_T_statistic -math.log(n) - math.log(comb(m,k2)) + math.log(comb(n+m, k1+k2))
 
 
-    #Csub_der = (N_der_sub)*(2*(n-k1))
-    #Csub_anc = (N_anc_sub)*(2*(m-k2))
-    #phi_sub = Csub_der*(1-(n/n+m)) / (Csub_der*(1-(n/n+m)) + Csub_anc*((n/n+m)))
-    #pi = (n - k1) / (n + m - k1 -k2)
-    #tst_sub =  (n - k1) * math.log(pi / phi_sub) + (m - k2) * math.log((1 - pi) / (1 - phi_sub))
-    #tst_sub_improved = tst_sub -math.log(n) - math.log(comb(m,k2)) + math.log(comb(n+m, k1+k2))
-
-
-    #N = number of lineages in total at the final generation
-    #fN = frequency of the derived allele at the final generation
-    #k = number of lineages in total at generation N
-    #fk = frequency of derived allele at generation N
-    #logF = vector of precomputed log factorial values, e.g. logF[2] = log(2!)
     k = k1 + k2
     fk = k1
     N = n + m
@@ -856,21 +671,10 @@ def onesite_tstat(ts,sel_pos):
     print(*list(outdict.keys()),sep="\t")
     print(*list(outdict.values()),sep="\t")
 
-
-    #print("Coalescence intervals for derived subtree:",der_intervals)
-    #print("Terminal DAF: ", n/(n+m))
-    #print("Coalescence intervals for derived subtree list:",der_intervals.values())
-    #print("Coalescence intervals for ancestral subtree:",anc_intervals)
-    #print("Coalescence intervals for derived subtree:",der_intervals)
-    #print("Coalescence ages for tree:",sorted(list(set((int(k) for k in t1_node_age.values())))))
-    
-
     
 ts = tskit.load(sys.argv[1])
 sel_pos = int(sys.argv[2])
 ## Sampling disabled ##
-#nsample = int(sys.argv[3])
-#ts = subsample(ts,nsample)
 if len(sys.argv) > 3:
     ts2 =  tskit.load(sys.argv[3])
     neut_pos = int(sys.argv[4])
@@ -878,12 +682,3 @@ if len(sys.argv) > 3:
     twosite_tstat(ts,sel_pos,ts2,neut_pos)
 else:
     onesite_tstat(ts,sel_pos)
-
-
-
-
-
-#print(sys.argv[1])
-#print("Coalescence ages for tree:",sorted(list(set((int(k) for k in t1_node_age.values())))))
-#tree = ts2.at(neut_pos)
-#print(tree.draw_text())

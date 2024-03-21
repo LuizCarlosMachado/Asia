@@ -1,3 +1,22 @@
+"""
+This script contains functions for performing a likelihood ratio test on a tree sequence.
+"""
+
+import sys
+from collections import defaultdict
+import pyslim
+import tskit
+from collections import Counter
+import random
+from random import randrange
+import msprime
+import math
+from math import isclose
+import numpy as np
+from scipy.stats import fisher_exact
+from math import comb
+
+# Rest of the code...
 import sys
 from collections import defaultdict
 import pyslim

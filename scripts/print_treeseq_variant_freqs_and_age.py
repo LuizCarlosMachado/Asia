@@ -14,6 +14,16 @@ from math import comb
 
 
 def children_of_node(node,tree):
+    """
+    Returns a list of all children nodes of a given node in a tree.
+
+    Args:
+        node (int): The node ID.
+        tree (tskit.TreeSequence): The tree sequence object.
+
+    Returns:
+        list: A list of all children nodes of the given node.
+    """
     all_children = []
     node_list = []
     node_list.append(node)
@@ -27,7 +37,18 @@ def children_of_node(node,tree):
             node_list.remove(n)
     return all_children
 
+
 def tips_of_node(node,tree):
+    """
+    Returns a list of all tips (leaf nodes) descended from a given node in a tree.
+
+    Args:
+        node (int): The node ID.
+        tree (tskit.TreeSequence): The tree sequence object.
+
+    Returns:
+        list: A list of all tips descended from the given node.
+    """
     all_children = []
     node_list = []
     node_list.append(node)
@@ -58,8 +79,8 @@ for v in ts.variants():
     node_age = var_tree.time(parent_node)
     root_age = var_tree.time(root)
     delta_age = root_age - node_age
-    if freq >0.20:
-        print(*[sys.argv[1], int(v.site.position), freq, node_age, root_age, delta_age],sep="\t")
+    if freq > 0.20:
+        print(*[sys.argv[1], int(v.site.position), freq, node_age, root_age, delta_age], sep="\t")
         #print(parent_node, sep="\t")
 
 

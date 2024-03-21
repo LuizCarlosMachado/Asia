@@ -1,58 +1,71 @@
-// human example params from doi:10.1371/journal.pgen.1009676
+// Human example parameters from doi:10.1371/journal.pgen.1009676
 initialize() {
-    defineConstant("muttime", 1000); // time mutations arise
-    defineConstant("haptime", 6700); // generations after mutations where four haps must be present
-    defineConstant("Na", 10000); // starting population size
-    defineConstant("K", 10);
+    // Definition of constants for the simulation
+    defineConstant("muttime", 1000);  // The time when mutations arise
+    defineConstant("haptime", 6700);  // Generations after mutations where four haplotypes must be present
+    defineConstant("Na", 10000);      // Starting population size
+    defineConstant("K", 10);          
     defineConstant("B_t", 7);
-    defineConstant("N0", 20); // population size today np.exp(np.random.uniform(np.log(Na), np.log(20*Na), n_draws)).astype(int)
+    defineConstant("N0", 20);         // Population size today
+    
+    // Initialization of the tree sequence recording, mutation rates, and types
     initializeTreeSeq(checkCoalescence=T);
     initializeMutationRate(0);
-    initializeMutationType("m1", 0.5, "f", 0.0);         // neutral "f"ixed DFE
-    initializeMutationType("m2", 0.5, "f", 0.0);         // neutral "f"ixed DFE
-    initializeMutationType("m4", 0.5, "f", sel_coeff); // 0.001 average human beneficial s
-    // Keep fixed mutations for visual inspection (slows down performance)
+    initializeMutationType("m1", 0.5, "f", 0.0);         // Neutral mutation type
+    initializeMutationType("m2", 0.5, "f", 0.0);         // Another neutral mutation type
+    initializeMutationType("m4", 0.5, "f", sel_coeff);   // Beneficial mutation type with selection coefficient `sel_coeff`
+    
+    // Preventing fixed mutations from being converted to substitutions
     m1.convertToSubstitution = F;
     m4.convertToSubstitution = F;
+    
+    // Initialization of genomic elements and recombination rates
     initializeGenomicElementType("g1", c(m1), c(1.0));
     initializeGenomicElement(g1, 0, 9999999);
     initializeRecombinationRate(1.0e-8);
+    
+    // Assigning color for visualization
     m4.color = "green";
 }
 
 1 {
-defineConstant("simID", getSeed());
-sim.addSubpop("p1", Na);
-sim.rescheduleScriptBlock(s1, start=2000, end=Tgen+1999);
-sim.rescheduleScriptBlock(s2, start=Tgen+1999, end=Tgen+2000); 
+    // Setting up the simulation ID based on the seed and creating the initial population
+    defineConstant("simID", getSeed());
+    sim.addSubpop("p1", Na);
+    
+    // Rescheduling script blocks to run at specified times
+    sim.rescheduleScriptBlock(s1, start=2000, end=Tgen+1999);
+    sim.rescheduleScriptBlock(s2, start=Tgen+1999, end=Tgen+2000); 
 }
 
 1999 late() {
-target1 = sample(p1.genomes, 1); // Increase number genomes mutated to increase prob of fixation
-target1.addNewDrawnMutation(m4, 5000000); // Beneficial mutation at position 
-pos_mut = sim.mutationsOfType(m4);
-sim.outputFull("/tmp/slim_" + simID + ".txt");
+    // Adding a new mutation to a randomly chosen genome
+    target1 = sample(p1.genomes, 1);
+    target1.addNewDrawnMutation(m4, 5000000);  // Adding a beneficial mutation at a specific position
+    
+    // Outputting the current simulation state
+    sim.outputFull("/tmp/slim_" + simID + ".txt");
 }
 
 s1 late() {
-pos_mut = sim.mutationsOfType(m4);
-cat(sim.mutationFrequencies(p1, sim.mutationsOfType(m4))+"\n");
-if (pos_mut.size() != 1) 
-{
-cat(simID + ": LOST HAP - STOP SIMULATION\n");
-sim.simulationFinished();
-}
-else
-{
-if (sim.mutationFrequencies(p1, sim.mutationsOfType(m4)) >= ((end_freq)))
-{
-cat("Reached End Freq\n");
-sim.treeSeqOutput(OutTree);
-sim.simulationFinished();
-}
-}
+    // Checking the status of the beneficial mutation and its frequency
+    pos_mut = sim.mutationsOfType(m4);
+    cat(sim.mutationFrequencies(p1, sim.mutationsOfType(m4))+"\n");
+    
+    // Stopping the simulation if the mutation is lost or reaches the desired end frequency
+    if (pos_mut.size() != 1) {
+        cat(simID + ": LOST HAP - STOP SIMULATION\n");
+        sim.simulationFinished();
+    } else {
+        if (sim.mutationFrequencies(p1, sim.mutationsOfType(m4)) >= ((end_freq))) {
+            cat("Reached End Freq\n");
+            sim.treeSeqOutput(OutTree);  // Outputting the tree sequence data
+            sim.simulationFinished();
+        }
+    }
 }
 
 s2 late() {
-sim.simulationFinished();
+    // Marks the end of the simulation
+    sim.simulationFinished();
 }
